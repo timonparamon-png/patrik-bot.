@@ -2,9 +2,9 @@ import os
 import telebot
 from groq import Groq
 
- "TELEGRAM_TOKEN = "8996493982:AAHLFIM790ZxZHuRFwHuKQDTBq25KkMtufM"
+TELEGRAM_TOKEN = "8996493982:AAHLFIM790ZxZHuRFwHuKQDTBq25KkMtufM"
 GROQ_API_KEY = "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"
- 
+
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 client = Groq(api_key=GROQ_API_KEY)
 
@@ -52,4 +52,5 @@ def handle_all_messages(message):
 if __name__ == "__main__":
     print("Патрик запущен...")
     bot.infinity_polling()
+ 
  
