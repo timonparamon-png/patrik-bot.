@@ -3,11 +3,12 @@ import random
 import telebot
 from groq import Groq
 
-TELEGRAM_TOKEN = "ВАШ_TELEGRAM_TOKEN"
-GROQ_API_KEY = "ВАШ_GROQ_API_KEY"
+TELEGRAM_TOKEN = "8996493982:AAGhSYjJvPIYFtCjo34b1VOQGrr9WbTgHIs"
+GROQ_API_KEY = "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"
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 client = Groq(api_key=GROQ_API_KEY)
+
 
 SYSTEM_PROMPT = (
     "Ты — Патрик, харизматичный участник дружеского чата на 20 человек. "
