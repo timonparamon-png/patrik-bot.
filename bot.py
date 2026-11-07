@@ -32,16 +32,21 @@ def generate_reply(user_message):
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     try:
+        print(f"Получено: {message.text}")
         text = message.text or ""
         if text:
             response = generate_reply(text)
             if response:
                 bot.reply_to(message, response)
-    except Exception:
-        pass
+            else:
+                bot.reply_to(message, "Хм, пустой ответ от ИИ...")
+    except Exception as e:
+        print(f"Ошибка: {e}")
+        bot.reply_to(message, f"Ошибка: {e}")
 
 if __name__ == "__main__":
     print("Патрик запущен...")
-    bot.infinity_polling() 
+    bot.infinity_polling()
+    
     
   
