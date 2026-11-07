@@ -3,7 +3,7 @@ import telebot
 import requests
 
 TELEGRAM_TOKEN = "8996493982:AAHLFIM790ZxZHuRFwHuKQDTBq25KkMtufM"
-GEMINI_API_KEY = "AQ.Ab8RN6KNjeqdnbcr2HvlHfIY5-HKNXt0SFwpzmHxC7z49K9EFQ"
+GEMINI_API_KEY = "AQ.Ab8RN6JFe6EyCdlSJWlvA1Pjm8jYs45oRwR0tr85yI1WNgGN1w"
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
@@ -22,13 +22,11 @@ def ask_gemini(prompt):
         response = requests.post(url, json=data, headers=headers, timeout=15)
         res_json = response.json()
         
-        # Безопасное извлечение ответа
         if "candidates" in res_json and len(res_json["candidates"]) > 0:
             candidate = res_json["candidates"][0]
             if "content" in candidate and "parts" in candidate["content"]:
                 return candidate["content"]["parts"][0]["text"]
         
-        # Если ответ заблокирован фильтрами безопасности
         if "promptFeedback" in res_json:
             return "Ой, Патрик смутился от такого вопроса! Спроси что-нибудь другое."
             
