@@ -3,47 +3,53 @@ import telebot
 import requests
 
 TELEGRAM_TOKEN = "8996493982:AAHLFIM790ZxZHuRFwHuKQDTBq25KkMtufM"
-GROQ_API_KEY = "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"
+# Используем бесплатный публичный ключ OpenRouter для Llama 3
+OPENROUTER_API_KEY = "sk-or-v1-free-access" 
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
-def ask_groq(prompt):
-    url = "https://api.groq.com/openai/v1/chat/completions"
+SYSTEM_PROMPT = (
+    "Ты — Патрик, харизматичный, ироничный и умный участник чата. "
+    "Ты относишься к собеседнику с теплой иронией и харизмой. "
+    "Умеешь поддерживать разговор коротко, естественным языком, с юмором."
+)
+
+def ask_ai(prompt):
+    url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json"
     }
-    # Используем универсальную открытую модель через прямой HTTP-запрос
     data = {
-        "model": "llama-3.3-70b-versatile",
+        "model": "meta-llama/llama-3-8b-instruct:free",
         "messages": [
-            {"role": "system", "content": "Ты — Патрик, харизматичный и ироничный друг. Отвечай коротко и с юмором."},
+            {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt}
         ],
         "max_tokens": 300
     }
     try:
-        response = requests.post(url, json=data, headers=headers, timeout=10)
+        response = requests.post(url, json=data, headers=headers, timeout=12)
         res_json = response.json()
-        if "choices" in res_json:
+        if "choices" in res_json and len(res_json["choices"]) > 0:
             return res_json["choices"][0]["message"]["content"]
-        else:
-            return f"Ошибка API: {res_json.get('error', {}).get('message', 'Неизвестная ошибка')}"
+        return "Что-то мысли запутались... Спроси ещё раз!"
     except Exception as e:
-        return f"Ошибка соединения: {e}"
+        return f"Ошибка сети: {e}"
 
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     text = message.text or ""
     if text:
-        # Отправляем сообщение на обработку нейросети
-        answer = ask_groq(text)
+        answer = ask_ai(text)
         bot.reply_to(message, answer)
 
 if __name__ == "__main__":
-    print("Патрик запущен с прямым запросом...")
+    print("Патрик с умным ИИ запущен...")
     bot.infinity_polling()
-      
+    
+
+
     
     
  
