@@ -3,50 +3,44 @@ import telebot
 import requests
 
 TELEGRAM_TOKEN = "8996493982:AAHLFIM790ZxZHuRFwHuKQDTBq25KkMtufM"
-# Используем бесплатный публичный ключ OpenRouter для Llama 3
-OPENROUTER_API_KEY = "sk-or-v1-free-access" 
+GEMINI_API_KEY = "AQ.Ab8RN6KNjeqdnbcr2HvlHfIY5-HKNXt0SFwpzmHxC7z49K9EFQ"
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
-SYSTEM_PROMPT = (
-    "Ты — Патрик, харизматичный, ироничный и умный участник чата. "
-    "Ты относишься к собеседнику с теплой иронией и харизмой. "
-    "Умеешь поддерживать разговор коротко, естественным языком, с юмором."
-)
-
-def ask_ai(prompt):
-    url = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
+def ask_gemini(prompt):
+    # Используем стабильную официальную модель Gemini 1.5 Flash
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+    
+    headers = {"Content-Type": "application/json"}
     data = {
-        "model": "meta-llama/llama-3-8b-instruct:free",
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt}
-        ],
-        "max_tokens": 300
+        "contents": [{
+            "parts": [
+                {"text": "Ты — Патрик, харизматичный, ироничный и умный участник чата. Отвечай с юмором, коротко и емко. Вот сообщение от пользователя: " + prompt}
+            ]
+        }]
     }
+    
     try:
         response = requests.post(url, json=data, headers=headers, timeout=12)
         res_json = response.json()
-        if "choices" in res_json and len(res_json["choices"]) > 0:
-            return res_json["choices"][0]["message"]["content"]
-        return "Что-то мысли запутались... Спроси ещё раз!"
+        
+        # Достаем ответ из ответа Gemini
+        answer = res_json["candidates"][0]["content"]["parts"][0]["text"]
+        return answer
     except Exception as e:
-        return f"Ошибка сети: {e}"
+        return f"Патрик задумался: {e}"
 
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     text = message.text or ""
     if text:
-        answer = ask_ai(text)
+        answer = ask_gemini(text)
         bot.reply_to(message, answer)
 
 if __name__ == "__main__":
-    print("Патрик с умным ИИ запущен...")
+    print("Патрик с Gemini запущен...")
     bot.infinity_polling()
+    
     
 
 
