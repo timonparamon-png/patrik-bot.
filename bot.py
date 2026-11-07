@@ -1,49 +1,46 @@
 import os
 import telebot
-import requests
+import google.generativeai as genai
 
 TELEGRAM_TOKEN = "8996493982:AAHLFIM790ZxZHuRFwHuKQDTBq25KkMtufM"
 GEMINI_API_KEY = "AQ.Ab8RN6JFe6EyCdlSJWlvA1Pjm8jYs45oRwR0tr85yI1WNgGN1w"
 
-bot = telebot.TeleBot(TELEGRAM_TOKEN)
+# Инициализируем официальный клиент Google Gemini
+genai.configure(api_key=GEMINI_API_KEY)
 
-def ask_gemini(prompt):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-    headers = {"Content-Type": "application/json"}
-    data = {
-        "contents": [{
-            "parts": [
-                {"text": "Ты — Патрик, харизматичный, ироничный друг. Отвечай с юмором и коротко. Сообщение: " + prompt}
-            ]
-        }]
-    }
-    
-    try:
-        response = requests.post(url, json=data, headers=headers, timeout=15)
-        res_json = response.json()
-        
-        if "candidates" in res_json and len(res_json["candidates"]) > 0:
-            candidate = res_json["candidates"][0]
-            if "content" in candidate and "parts" in candidate["content"]:
-                return candidate["content"]["parts"][0]["text"]
-        
-        if "promptFeedback" in res_json:
-            return "Ой, Патрик смутился от такого вопроса! Спроси что-нибудь другое."
-            
-        return f"Ответ от сервера: {str(res_json)[:150]}"
-    except Exception as e:
-        return f"Ошибка связи с ИИ: {e}"
+# Настраиваем параметры генерации
+generation_config = {
+    "temperature": 0.9,
+    "max_output_tokens": 300,
+}
+
+# Используем стабильную модель через официальный SDK
+model = genai.GenerativeModel(
+    model_name="gemini-1.5-flash",
+    generation_config=generation_config
+)
+
+bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     text = message.text or ""
     if text:
-        answer = ask_gemini(text)
-        bot.reply_to(message, answer)
+        try:
+            prompt = f"Ты — Патрик, харизматичный, ироничный друг. Отвечай с юмором и коротко. Сообщение: {text}"
+            response = model.generate_content(prompt)
+            
+            if response and response.text:
+                bot.reply_to(message, response.text)
+            else:
+                bot.reply_to(message, "Патрик призадумался и остался без слов...")
+        except Exception as e:
+            bot.reply_to(message, f"Ошибка ИИ: {e}")
 
 if __name__ == "__main__":
-    print("Патрик с Gemini запущен...")
+    print("Патрик запущен с официальным SDK Gemini...")
     bot.infinity_polling()
+    
     
     
     
