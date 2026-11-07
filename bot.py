@@ -15,9 +15,9 @@ SYSTEM_PROMPT = (
 
 def generate_reply(user_message):
     try:
-        # Используем актуальную легкую модель
+        # Используем актуальную рабочую модель
         completion = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_message}
@@ -36,7 +36,6 @@ def handle_all_messages(message):
     try:
         text = message.text or ""
         if text:
-            # Отправляем сообщение нейросети
             response = generate_reply(text)
             bot.reply_to(message, response)
     except Exception as e:
@@ -47,5 +46,6 @@ if __name__ == "__main__":
     bot.infinity_polling()
     
     
+    
  
- 
+  
