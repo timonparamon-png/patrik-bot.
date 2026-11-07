@@ -42,6 +42,6 @@ def handle_all_messages(message):
 
 if __name__ == "__main__":
     print("Патрик запущен...")
-    bot.infinity_polling()
+    bot.infinity_polling() 
     
   
