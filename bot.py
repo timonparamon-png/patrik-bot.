@@ -1,50 +1,49 @@
 import os
 import telebot
-from groq import Groq
+import requests
 
 TELEGRAM_TOKEN = "8996493982:AAHLFIM790ZxZHuRFwHuKQDTBq25KkMtufM"
 GROQ_API_KEY = "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"
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
-client = Groq(api_key=GROQ_API_KEY)
 
-SYSTEM_PROMPT = (
-    "Ты — Патрик, харизматичный, ироничный и умный участник чата. "
-    "Ты умеешь поддержать разговор с юмором, отвечаешь емко и по делу."
-)
-
-def generate_reply(user_message):
+def ask_groq(prompt):
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    # Используем универсальную открытую модель через прямой HTTP-запрос
+    data = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": "Ты — Патрик, харизматичный и ироничный друг. Отвечай коротко и с юмором."},
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": 300
+    }
     try:
-        # Используем актуальную рабочую модель
-        completion = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_message}
-            ],
-            temperature=0.75,
-            max_tokens=300
-        )
-        if completion.choices and completion.choices[0].message:
-            return completion.choices[0].message.content
-        return "Хм, пустота в голове..."
+        response = requests.post(url, json=data, headers=headers, timeout=10)
+        res_json = response.json()
+        if "choices" in res_json:
+            return res_json["choices"][0]["message"]["content"]
+        else:
+            return f"Ошибка API: {res_json.get('error', {}).get('message', 'Неизвестная ошибка')}"
     except Exception as e:
-        return f"Ошибка ИИ: {e}"
+        return f"Ошибка соединения: {e}"
 
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
-    try:
-        text = message.text or ""
-        if text:
-            response = generate_reply(text)
-            bot.reply_to(message, response)
-    except Exception as e:
-        bot.reply_to(message, f"Ошибка: {e}")
+    text = message.text or ""
+    if text:
+        # Отправляем сообщение на обработку нейросети
+        answer = ask_groq(text)
+        bot.reply_to(message, answer)
 
 if __name__ == "__main__":
-    print("Патрик с мозгами запущен...")
+    print("Патрик запущен с прямым запросом...")
     bot.infinity_polling()
-    
+      
     
     
  
