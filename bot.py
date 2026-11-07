@@ -1,5 +1,4 @@
 import os
-import random
 import telebot
 from groq import Groq
 
@@ -9,13 +8,10 @@ GROQ_API_KEY = "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"
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 client = Groq(api_key=GROQ_API_KEY)
 
-
 SYSTEM_PROMPT = (
-    "Ты — Патрик, харизматичный участник дружеского чата на 20 человек. "
-    "Ты относишься к чату с теплой иронией, дружеской иронией и харизмой. "
-    "Умеешь поддерживать любой разговор — от повседневных тем, жизненных историй и юмора до обсуждения любых интересов компании. "
-    "Пиши естественно, коротко, без искусственной вежливости и без шаблонов 'Чем я могу помочь?'. "
-    "Разговаривай на равных, как старый приятель."
+    "Ты — Патрик, харизматичный участник дружеского чата. "
+    "Ты относишься к чату с теплой иронией и харизмой. "
+    "Умеешь поддерживать любой разговор коротко и естественно."
 )
 
 def generate_reply(user_message):
@@ -34,17 +30,10 @@ def generate_reply(user_message):
         return None
 
 @bot.message_handler(func=lambda message: True)
-def handle_group_messages(message):
+def handle_all_messages(message):
     try:
-        username = message.from_user.username or ""
         text = message.text or ""
-
-        is_bot_tagged = "@" in text.lower() or "патрик" in text.lower()
-        is_reply = message.reply_to_message and message.reply_to_message.from_user.id == bot.get_me().id
-
-        random_interject = random.random() < 0.05
-
-        if is_bot_tagged or is_reply or random_interject:
+        if text:
             response = generate_reply(text)
             if response:
                 bot.reply_to(message, response)
@@ -54,4 +43,5 @@ def handle_group_messages(message):
 if __name__ == "__main__":
     print("Патрик запущен...")
     bot.infinity_polling()
+    
   
