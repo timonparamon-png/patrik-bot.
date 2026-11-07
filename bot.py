@@ -3,11 +3,11 @@ import telebot
 from groq import Groq
 
 TELEGRAM_TOKEN = "8996493982:AAGhSYjJvPIYFtCjo34b1VOQGrr9WbTgHIs"
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "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"
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 client = Groq(api_key=GROQ_API_KEY)
-
+ 
 SYSTEM_PROMPT = (
     "Ты — Патрик, харизматичный участник дружеского чата. "
     "Ты относишься к чату с теплой иронией и харизмой. "
