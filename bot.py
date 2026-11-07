@@ -1,37 +1,59 @@
 import os
 import telebot
-import google.generativeai as genai
+import requests
 
 TELEGRAM_TOKEN = "8996493982:AAHLFIM790ZxZHuRFwHuKQDTBq25KkMtufM"
-API_KEY = "AQ.Ab8RN6JAoGzTAakG_5A0BslqKdfTSg5t4Zz5eiBJ42-YMe_77g"
-
-# Настраиваем официальный SDK Google для работы с OAuth-ключом
-genai.configure(api_key=API_KEY)
-
-# Используем официальную стабильную модель
-model = genai.GenerativeModel("gemini-1.5-flash")
+OAUTH_TOKEN = "AQ.Ab8RN6JAoGzTAakG_5A0BslqKdfTSg5t4Zz5eiBJ42-YMe_77g"
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
+
+def ask_gemini(prompt):
+    # Используем стабильную эндпоинт-ссылку модели gemini-1.5-flash
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+    
+    # Для OAuth-токенов (начинающихся с AQ.) обязателен заголовок Bearer
+    headers = {
+        "Authorization": f"Bearer {OAUTH_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        "contents": [{
+            "parts": [
+                {"text": "Ты — Патрик, харизматичный, ироничный друг. Отвечай с юмором и коротко. Сообщение: " + prompt}
+            ]
+        }]
+    }
+    
+    try:
+        response = requests.post(url, json=data, headers=headers, timeout=15)
+        res_json = response.json()
+        
+        # Проверяем успешность ответа и вытаскиваем текст
+        if "candidates" in res_json and len(res_json["candidates"]) > 0:
+            candidate = res_json["candidates"][0]
+            if "content" in candidate and "parts" in candidate["content"]:
+                return candidate["content"]["parts"][0]["text"]
+        
+        # Если пришла ошибка от Google, покажем её текст для отладки
+        if "error" in res_json:
+            return f"Ошибка Google: {res_json['error'].get('message', 'Неизвестно')}"
+            
+        return f"Ответ: {str(res_json)[:150]}"
+    except Exception as e:
+        return f"Ошибка связи: {e}"
 
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     text = message.text or ""
     if text:
-        try:
-            prompt = f"Ты — Патрик, харизматичный, ироничный друг. Отвечай с юмором и коротко. Сообщение: {text}"
-            response = model.generate_content(prompt)
-            
-            if response and response.text:
-                bot.reply_to(message, response.text)
-            else:
-                bot.reply_to(message, "Патрик призадумался...")
-        except Exception as e:
-            bot.reply_to(message, f"Ошибка ИИ: {e}")
+        answer = ask_gemini(text)
+        bot.reply_to(message, answer)
 
 if __name__ == "__main__":
-    print("Патрик запущен через официальный SDK...")
+    print("Патрик запущен с точным OAuth-заголовком...")
     bot.infinity_polling()
-    
+
     
     
     
