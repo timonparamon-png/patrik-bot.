@@ -17,7 +17,8 @@ SYSTEM_PROMPT = (
 def generate_reply(user_message):
     try:
         completion = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+                model="llama-3.1-8b",
+          
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_message}
