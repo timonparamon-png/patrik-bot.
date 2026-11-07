@@ -2,12 +2,12 @@ import os
 import telebot
 from groq import Groq
 
-TELEGRAM_TOKEN = "8996493982:AAGhSYjJvPIYFtCjo34b1VOQGrr9WbTgHIs"
+TELEGRAM_TOKEN = "8996493982:AAGhSYJvPYFtCjo34b1V0QGrr9WbTgHiS"
 GROQ_API_KEY = "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"
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 client = Groq(api_key=GROQ_API_KEY)
- 
+
 SYSTEM_PROMPT = (
     "Ты — Патрик, харизматичный участник дружеского чата. "
     "Ты относишься к чату с теплой иронией и харизмой. "
@@ -17,8 +17,7 @@ SYSTEM_PROMPT = (
 def generate_reply(user_message):
     try:
         completion = client.chat.completions.create(
-                model="llama-3.1-8b",
-          
+            model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_message}
@@ -34,7 +33,6 @@ def generate_reply(user_message):
     except Exception as e:
         print(f"Ошибка внутри generate_reply: {e}")
         return f"Ошибка ИИ: {e}"
-        
 
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
@@ -54,6 +52,5 @@ def handle_all_messages(message):
 if __name__ == "__main__":
     print("Патрик запущен...")
     bot.infinity_polling()
-    
-    
-  
+ 
+ 
