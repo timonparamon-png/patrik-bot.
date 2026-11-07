@@ -17,7 +17,7 @@ SYSTEM_PROMPT = (
 def generate_reply(user_message):
     try:
         completion = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_message}
@@ -25,9 +25,15 @@ def generate_reply(user_message):
             temperature=0.75,
             max_tokens=300
         )
-        return completion.choices[0].message.content
-    except Exception:
-        return None
+        print("Ответ от Groq целиком:", completion)
+        
+        if completion.choices and completion.choices[0].message:
+            return completion.choices[0].message.content
+        return "Пустой массив ответов"
+    except Exception as e:
+        print(f"Ошибка внутри generate_reply: {e}")
+        return f"Ошибка ИИ: {e}"
+        
 
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
