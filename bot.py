@@ -37,6 +37,7 @@ def handle_all_messages(message):
 if __name__ == "__main__":
     print("Патрик запущен с Groq API...")
     bot.infinity_polling()
+    
 
     
     
