@@ -7,51 +7,35 @@ GROQ_API_KEY = "Gsk_KSU8R3QlydjFI7DsV6PQWGdyb3FYIqQ5Sv25O8RvPRYIArmzMTPm"
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
-def ask_gemini(prompt):
-    # Используем стабильную эндпоинт-ссылку модели gemini-1.5-flash
-    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-    
-    # Для OAuth-токенов (начинающихся с AQ.) обязателен заголовок Bearer
+def ask_groq(prompt):
+    url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
-        "Authorization": f"Bearer {OAUTH_TOKEN}",
+        "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json"
     }
-    
     data = {
-        "contents": [{
-            "parts": [
-                {"text": "Ты — Патрик, харизматичный, ироничный друг. Отвечай с юмором и коротко. Сообщение: " + prompt}
-            ]
-        }]
+        "model": "llama3-8b-8192",
+        "messages": [
+            {"role": "system", "content": "Ты — Патрик, харизматичный, ироничный друг. Отвечай с юмором и коротко."},
+            {"role": "user", "content": prompt}
+        ]
     }
-    
     try:
         response = requests.post(url, json=data, headers=headers, timeout=15)
         res_json = response.json()
-        
-        # Проверяем успешность ответа и вытаскиваем текст
-        if "candidates" in res_json and len(res_json["candidates"]) > 0:
-            candidate = res_json["candidates"][0]
-            if "content" in candidate and "parts" in candidate["content"]:
-                return candidate["content"]["parts"][0]["text"]
-        
-        # Если пришла ошибка от Google, покажем её текст для отладки
-        if "error" in res_json:
-            return f"Ошибка Google: {res_json['error'].get('message', 'Неизвестно')}"
-            
-        return f"Ответ: {str(res_json)[:150]}"
+        return res_json["choices"][0]["message"]["content"]
     except Exception as e:
-        return f"Ошибка связи: {e}"
+        return f"Ошибка связи с Groq: {e}"
 
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     text = message.text or ""
     if text:
-        answer = ask_gemini(text)
+        answer = ask_groq(text)
         bot.reply_to(message, answer)
 
 if __name__ == "__main__":
-    print("Патрик запущен с точным OAuth-заголовком...")
+    print("Патрик запущен с Groq API...")
     bot.infinity_polling()
 
     
