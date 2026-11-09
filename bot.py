@@ -16,17 +16,24 @@ def ask_groq(prompt):
     data = {
         "model": "llama3-8b-8192",
         "messages": [
-            {"role": "system", "content": "Ты — Патрик, харизматичный, ироничный друг. Отвечай с юмором и коротко."},
+            {"role": "system", "content": "Ты — Патрик, харизматичный, ироничный бот."},
             {"role": "user", "content": prompt}
         ]
     }
     try:
         response = requests.post(url, json=data, headers=headers, timeout=15)
         res_json = response.json()
-        return res_json["choices"][0]["message"]["content"]
+        
+        if "choices" in res_json and len(res_json["choices"]) > 0:
+            return res_json["choices"][0]["message"]["content"]
+        elif "error" in res_json:
+            return f"Ошибка от Groq: {res_json['error'].get('message', res_json['error'])}"
+        else:
+            return f"Неизвестный ответ от Groq: {res_json}"
+            
     except Exception as e:
         return f"Ошибка связи с Groq: {e}"
-
+        
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     text = message.text or ""
