@@ -3,7 +3,7 @@ import telebot
 import requests
 
 TELEGRAM_TOKEN = "8996493982:AAGvfBC1U4uABLaWM8bZQxOQUuuJP8EKSJs"
-GROQ_API_KEY = "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" 
+GROQ_API_KEY = "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" 
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
