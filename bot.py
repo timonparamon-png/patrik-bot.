@@ -14,7 +14,7 @@ def ask_groq(prompt):
         "Content-Type": "application/json"
     }
     data = {
-        "model": "llama3-8b-8192",
+        "model": "llama-3.1-8b-instant", 
         "messages": [
             {"role": "system", "content": "Ты — Патрик, харизматичный, ироничный бот."},
             {"role": "user", "content": prompt}
